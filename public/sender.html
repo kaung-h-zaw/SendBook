@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SendBook — Sender</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/sendbook-logo.svg" type="image/svg+xml" />
+    <link rel="shortcut icon" href="/sendbook-logo.svg" type="image/svg+xml" />
+    <meta name="sendo-api-base" content="" />
+
+    <style>
+      :root {
+        --ink: #111;
+        --muted: #555;
+        --border: #ccc;
+        --paper: #fff;
+        --bg: #f9f9f9;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+          sans-serif;
+      }
+      .wrap {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 24px 16px;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 8px 0 4px;
+        text-align: center;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .card {
+        background: var(--paper);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+        margin: 12px 0;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      }
+      .row {
+        margin: 12px 0;
+      }
+      .input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 16px;
+      }
+      .btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #eee;
+        font-weight: 600;
+        color: var(--ink);
+        text-align: center;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: #e2e2e2;
+      }
+      .btn:active {
+        background: #ddd;
+      }
+      .btn[disabled] {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .mono {
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+      }
+      .hide {
+        display: none;
+      }
+      .footer {
+        margin-top: 24px;
+        color: #444;
+        font-size: 13px;
+        text-align: center;
+        font-weight: 500;
+      }
+      .brand {
+        text-align: center;
+        margin-bottom: 8px;
+      }
+      .brand-logo {
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 8px;
+      }
+      .brand-text {
+        display: inline-block;
+        vertical-align: middle;
+        font-size: 30px;
+        font-weight: 700;
+        line-height: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div
+        id="notice"
+        style="
+          display: none;
+          position: fixed;
+          left: 14px;
+          right: 14px;
+          width: auto;
+          max-width: none;
+          transform: none;
+          bottom: 14px;
+          bottom: calc(14px + env(safe-area-inset-bottom));
+          z-index: 9999;
+          box-sizing: border-box;
+          padding: 10px 12px;
+          border: 1px solid #bbb;
+          border-radius: 8px;
+          background: #f3f3f3;
+          color: #000;
+          font-size: 13px;
+          line-height: 1.35;
+          text-align: center;
+          white-space: normal;
+          overflow-wrap: anywhere;
+          word-break: break-word;
+        "
+      ></div>
+      <div class="brand">
+        <img src="/sendbook-logo.svg" alt="SendBook logo" class="brand-logo" />
+        <span class="brand-text">SendBook</span>
+      </div>
+      <h1 style="margin: 0 0 4px">Sender</h1>
+      <div class="sub">Enter the key shown on your e-reader (or scan QR)</div>
+
+      <div id="connectCard" class="card">
+        <div class="row">
+          <input
+            id="codeInput"
+            class="input mono"
+            maxlength="4"
+            placeholder="Enter receiver key (e.g. A3BF)"
+          />
+        </div>
+        <div class="row">
+          <button id="connectBtn" class="btn">Connect</button>
+        </div>
+        <div id="connectStatus" class="muted"></div>
+      </div>
+
+      <div id="uploadCard" class="card hide">
+        <div class="muted" id="connectedTo"></div>
+        <div class="row">
+          <input
+            id="fileInput"
+            type="file"
+            class="input"
+            accept=".epub,.mobi,.azw,.azw3,.pdf,.txt"
+          />
+        </div>
+        <div class="row">
+          <button id="uploadBtn" class="btn" disabled>Upload</button>
+        </div>
+        <div class="row">
+          <button id="disconnectBtn" class="btn">Disconnect</button>
+        </div>
+        <div id="uploadStatus" class="muted"></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top: 0">How SendBook works</h3>
+        <ul
+          style="
+            padding-left: 18px;
+            margin: 0;
+            font-size: 13px;
+            color: #333;
+            line-height: 1.5;
+          "
+        >
+          <li>Receivers create a short-lived session and get a code & QR.</li>
+          <li>Senders join with the 4-character code or by scanning QR.</li>
+          <li>
+            One file at a time. Formats:
+            <span class="mono">.epub .mobi .azw .azw3 .pdf .txt</span>
+          </li>
+          <li>
+            Files auto-delete after download, replacement, disconnect, or
+            inactivity.
+          </li>
+          <li>No accounts, no analytics — just minimal temporary storage.</li>
+        </ul>
+      </div>
+
+      <div class="footer">Created by <strong>Kaung</strong> • © 2026 SendBook</div>
+    </div>
+
+    <script src="/sender.js?v=5" defer></script>
+  </body>
+</html>

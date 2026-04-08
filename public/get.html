@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SendBook - Download</title>
+  <link rel="icon" href="/sendbook-logo.svg" type="image/svg+xml" />
+  <link rel="shortcut icon" href="/sendbook-logo.svg" type="image/svg+xml" />
+  <style>
+    body { font-family: Georgia, serif; max-width: 480px; margin: 40px auto; padding: 20px; background: #fff; color: #000; }
+    h1 { font-size: 22px; }
+    p { font-size: 15px; line-height: 1.6; }
+    #downloadBtn { display: none; margin-top: 20px; padding: 12px 20px; background: #000; color: #fff; text-align: center; text-decoration: none; font-size: 16px; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>SENDO File Download</h1>
+  <p id="status">Loading…</p>
+  <div id="content"></div>
+  <a id="downloadBtn" href="#">Download File</a>
+
+  <script>
+    var fileId = window.location.search.replace('?id=', '');
+    var API = '';
+
+    if (!fileId) {
+      document.getElementById('status').innerHTML = '<span class="error">No session ID provided.</span>';
+    } else {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', API + '/api/session/' + encodeURIComponent(fileId) + '/status', true);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status !== 200) {
+          document.getElementById('status').innerHTML = '<span class="error">Session not found or expired.</span>';
+          return;
+        }
+        var data;
+        try { data = JSON.parse(xhr.responseText); } catch(e) { return; }
+
+        if (!data.hasFile) {
+          document.getElementById('status').innerText = 'No file available yet. Try refreshing.';
+          return;
+        }
+
+        document.getElementById('status').innerText = 'File ready:';
+        document.getElementById('content').innerHTML =
+          '<p>' + (data.file ? data.file.name + ' (' + Math.round(data.file.size / 1024) + ' KB)' : '') + '</p>';
+
+        var btn = document.getElementById('downloadBtn');
+        btn.href = API + '/api/download/' + encodeURIComponent(fileId) + '?receiverToken=' + encodeURIComponent('RECEIVER_TOKEN_HERE');
+        btn.style.display = 'block';
+      };
+      xhr.send();
+    }
+  </script>
+</body>
+</html>

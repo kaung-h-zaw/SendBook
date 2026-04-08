@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://send-book.vercel.app/sitemap.xml

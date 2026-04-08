@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   keywords: [
     'sendbook',
     'send book',
+    'kindle',
+    'kobo',
     'send ebook',
     'receive ebook',
     'ebook transfer',
